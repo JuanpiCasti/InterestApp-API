@@ -1,2 +1,4 @@
 venv
 %SystemDrive%
+__pycache__
+interestapp_api.egg-info
