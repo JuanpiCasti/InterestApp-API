@@ -1,4 +1,4 @@
 venv
 %SystemDrive%
-interestapp_api/__pycache__
-interestapp_api/interestapp_api.egg-info
+interestapp_api/__pycache__/
+interestapp_api/interestapp_api.egg-info/
