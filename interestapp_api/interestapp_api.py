@@ -19,7 +19,7 @@ record_schema = record_schema.record
 @app.route('/')
 def index():
     print(record_schema.dump(record.query.first()))
-    return 'pedo'
+    return 'safs'
 
 
 if __name__ == "__main":
