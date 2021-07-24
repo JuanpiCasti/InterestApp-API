@@ -9,3 +9,4 @@ class Record(ma.Schema):
 
 
 record = Record()
+records = Record(many=True)

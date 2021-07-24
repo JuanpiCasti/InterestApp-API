@@ -12,5 +12,13 @@ class Record(db.Model):
     effective_rate = db.Column(db.Float)
     final_sum = db.Column(db.Float)
 
+    def __init__(self, effective_rate, final_sum, initial_capital, name, number_of_periods, rate):
+        self.effective_rate = effective_rate
+        self.final_sum = final_sum
+        self.initial_capital = initial_capital
+        self.name = name
+        self.number_of_periods = number_of_periods
+        self.rate = rate
+
     def __repr__(self):
-        return f"This is {self.name}."
+        return f"This is record number {self.name}."
