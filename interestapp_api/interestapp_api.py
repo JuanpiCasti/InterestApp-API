@@ -1,7 +1,6 @@
 from Models import connection, record
 from Schemas import schemas, record_schema
 from flask import Flask, jsonify, request
-import json
 
 
 app = Flask(__name__)
