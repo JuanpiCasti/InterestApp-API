@@ -49,9 +49,9 @@ def insert_record():
     else:
         return {'error': 'Incorrect HTTP method'}
 
-@app.route('/delete/<int:id>', methods=['POST'])
+@app.route('/delete/<int:id>', methods=['DELETE'])
 def delete_record(id):
-    if request.method == 'POST':
+    if request.method == 'DELETE':
         row = record.query.get(id)
         response_record = row
         db.session.delete(row)
@@ -61,9 +61,9 @@ def delete_record(id):
     else:
         return {'error': 'Incorrect HTTP method'}
 
-@app.route('/edit/<int:id>', methods=['POST'])
+@app.route('/edit/<int:id>', methods=['PUT'])
 def edit_record(id):
-    if request.method == 'POST':
+    if request.method == 'PUT':
         row = record.query.get(id)
         request_dict = request.form.to_dict()
         row.name = request_dict.get('name')
