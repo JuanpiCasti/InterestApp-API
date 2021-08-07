@@ -15,6 +15,15 @@ record = record.Record
 schemas.ma.init_app(app)
 record_schema = record_schema.record
 
+def calc_final_sum(capital, rate, time, type):
+    if type == "anual":
+        final_sum = capital*(1+rate)**time
+    if type =="monthly":
+        final_sum = capital*(1+(rate/12))**(time*12)
+    if type == "weekly":
+        final_sum = capital*(1+(rate/52))**(time*52)
+    if type == "daily":
+        final_sum = capital*(1+(rate/365))**(time*365)
 
 @app.route('/', methods=['GET'])
 def get_all():
@@ -32,13 +41,15 @@ def insert_record():
         data = request.form.to_dict()
 
         effective_rate = float(data.get('effective_rate'))
-        final_sum = float(data.get('final_sum'))
         initial_capital = float(data.get('initial_capital'))
-        name = data.get('name')
+        name = data.get('name')[0:20]
         number_of_periods = int(data.get('number_of_periods'))
         rate = float(data.get('rate'))
+        type = str(data.get('type'))
 
-        row = record(effective_rate, final_sum, initial_capital, name, number_of_periods, rate)
+        final_sum = calc_final_sum(initial_capital, rate, number_of_periods,type)
+
+        row = record(effective_rate, final_sum, initial_capital, name, number_of_periods, rate, type)
         db.session.add(row)
         db.session.commit()
 
