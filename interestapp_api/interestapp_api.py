@@ -26,8 +26,6 @@ def calc_final_sum(capital, rate, time, type_of_period):
         final_sum = capital*((1+(rate/52))**(time*52))
     elif type_of_period == "daily":
         final_sum = capital*((1+(rate/365))**(time*365))
-    else:
-        final_sum = 0
     return final_sum
 
 @app.route('/', methods=['GET'])
@@ -62,8 +60,11 @@ def insert_record():
         if not missing:
 
             effective_rate = 'placeholder'
-
-            final_sum = calc_final_sum(input_values['initial_capital'], input_values['rate'], input_values['number_of_periods'],input_values['type_of_period'])
+            
+            if input_values['type_of_period'] in ['annual', 'monthly','weekly','daily']:
+                final_sum = calc_final_sum(input_values['initial_capital'], input_values['rate'], input_values['number_of_periods'],input_values['type_of_period'])
+            else:
+                return {'error': "type_of_period has an incorrect value, it should be 'annual', 'monthly', 'weekly' or 'daily' "}
 
             row = record(effective_rate=effective_rate, final_sum=final_sum, initial_capital=input_values['initial_capital'], name=input_values['name'], number_of_periods=input_values['number_of_periods'], rate=input_values['rate'], type_of_period=input_values['type_of_period'])
             db.session.add(row)
@@ -99,6 +100,7 @@ def delete_record(id):
 
 @app.route('/edit/<int:id>', methods=['PUT'])
 def edit_record(id):
+    #TODO format data and calculate final_sum like in insert_record
     if request.method == 'PUT':
         row = record.query.get(id)
         request_dict = request.form.to_dict()
