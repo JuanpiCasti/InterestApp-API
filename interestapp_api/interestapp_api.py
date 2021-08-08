@@ -3,6 +3,7 @@ from Models import connection, record
 from Schemas import schemas, record_schema
 from flask import Flask, jsonify, request
 
+#TODO calculate effective rate
 
 app = Flask(__name__)
 
@@ -80,10 +81,11 @@ def insert_record():
     
             return response
         else:
-            response = {'error': ''}
+            response = {}
+            error = ''
             for el in missing:
-                response['error'] += el + ', '
-            response['error'] += 'is/are missing.'
+                error += el + ', '
+            response['error'] = error + 'is/are missing.'
             return response
        
 
@@ -104,7 +106,6 @@ def delete_record(id):
 
 @app.route('/edit/<int:id>', methods=['PUT'])
 def edit_record(id):
-    #TODO format data and calculate final_sum like in insert_record
     if request.method == 'PUT':
         row = record.query.get(id)
         data = request.form.to_dict()
@@ -131,11 +132,19 @@ def edit_record(id):
             row.number_of_periods = input_values['number_of_periods']
             row.rate = input_values['rate']
             row.type_of_period = input_values['type_of_period']
-            
+
             db.session.commit()
             print(row)
             new_row = record.query.get(row.id)
             response = record_schema.dump(new_row)
+            return response
+            
+        else:
+            response = {}
+            error = ''
+            for el in missing:
+                error += el + ', '
+            response['error'] = error + 'is/are missing.'
             return response
     else:
         return {'error': 'Incorrect HTTP method'}
