@@ -1,3 +1,4 @@
+from os import error
 from Models import connection, record
 from Schemas import schemas, record_schema
 from flask import Flask, jsonify, request
@@ -15,15 +16,19 @@ record = record.Record
 schemas.ma.init_app(app)
 record_schema = record_schema.record
 
-def calc_final_sum(capital, rate, time, type):
-    if type == "anual":
-        final_sum = capital*(1+rate)**time
-    if type =="monthly":
-        final_sum = capital*(1+(rate/12))**(time*12)
-    if type == "weekly":
-        final_sum = capital*(1+(rate/52))**(time*52)
-    if type == "daily":
-        final_sum = capital*(1+(rate/365))**(time*365)
+def calc_final_sum(capital, rate, time, type_of_period):
+    rate = rate/100
+    if type_of_period == "annual":
+        final_sum = capital*((1+rate)**time)
+    elif type_of_period =="monthly":
+        final_sum = capital*((1+(rate/12))**(time*12))
+    elif type_of_period == "weekly":
+        final_sum = capital*((1+(rate/52))**(time*52))
+    elif type_of_period == "daily":
+        final_sum = capital*((1+(rate/365))**(time*365))
+    else:
+        final_sum = 0
+    return final_sum
 
 @app.route('/', methods=['GET'])
 def get_all():
@@ -40,23 +45,43 @@ def insert_record():
 
         data = request.form.to_dict()
 
-        effective_rate = float(data.get('effective_rate'))
-        initial_capital = float(data.get('initial_capital'))
-        name = data.get('name')[0:20]
-        number_of_periods = int(data.get('number_of_periods'))
-        rate = float(data.get('rate'))
-        type = str(data.get('type'))
+        input_values = {
+            'initial_capital' : float(data.get('initial_capital', False)),
+            'name' : data.get('name', False)[0:20],
+            'number_of_periods' : int(data.get('number_of_periods', False)),
+            'rate' : float(data.get('rate', False)),
+            'type_of_period' : data.get('type_of_period', False)
+        }
 
-        final_sum = calc_final_sum(initial_capital, rate, number_of_periods,type)
+        missing = []
 
-        row = record(effective_rate, final_sum, initial_capital, name, number_of_periods, rate, type)
-        db.session.add(row)
-        db.session.commit()
+        for key in input_values.keys():
+            if not input_values[key]:
+                missing.append(key)
+        
+        if not missing:
 
-        response_record = record.query.all()[-1]
-        response = record_schema.dump(response_record)
+            effective_rate = 'placeholder'
 
-        return response
+            final_sum = calc_final_sum(input_values['initial_capital'], input_values['rate'], input_values['number_of_periods'],input_values['type_of_period'])
+
+            row = record(effective_rate=effective_rate, final_sum=final_sum, initial_capital=input_values['initial_capital'], name=input_values['name'], number_of_periods=input_values['number_of_periods'], rate=input_values['rate'], type_of_period=input_values['type_of_period'])
+            db.session.add(row)
+            db.session.commit()
+            id = row.id
+            
+            response_record = record.query.get(id)
+            response = record_schema.dump(response_record)
+    
+            return response
+        else:
+            response = {'error': ''}
+            for el in missing:
+                response['error'] += el + ', '
+            response['error'] += 'are missing.'
+            return response
+       
+
     else:
         return {'error': 'Incorrect HTTP method'}
 
