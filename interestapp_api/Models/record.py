@@ -14,4 +14,4 @@ class Record(db.Model):
     type_of_period = db.Column(db.String(10))
 
     def __repr__(self):
-        return f"This is record number {self.name}."
+        return f"This is record id {self.id}."

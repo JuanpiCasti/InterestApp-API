@@ -28,6 +28,17 @@ def calc_final_sum(capital, rate, time, type_of_period):
         final_sum = capital*((1+(rate/365))**(time*365))
     return final_sum
 
+def correct_input_data(data):
+        clean_data = {
+            'initial_capital' : float(data.get('initial_capital', False)),
+            'name' : data.get('name', False)[0:20],
+            'number_of_periods' : int(data.get('number_of_periods', False)),
+            'rate' : float(data.get('rate', False)),
+            'type_of_period' : data.get('type_of_period', False)
+        }
+
+        return clean_data
+
 @app.route('/', methods=['GET'])
 def get_all():
     rows = record.query.all()
@@ -43,14 +54,7 @@ def insert_record():
 
         data = request.form.to_dict()
 
-        input_values = {
-            'initial_capital' : float(data.get('initial_capital', False)),
-            'name' : data.get('name', False)[0:20],
-            'number_of_periods' : int(data.get('number_of_periods', False)),
-            'rate' : float(data.get('rate', False)),
-            'type_of_period' : data.get('type_of_period', False)
-        }
-
+        input_values =  correct_input_data(data)
         missing = []
 
         for key in input_values.keys():
@@ -79,7 +83,7 @@ def insert_record():
             response = {'error': ''}
             for el in missing:
                 response['error'] += el + ', '
-            response['error'] += 'are missing.'
+            response['error'] += 'is/are missing.'
             return response
        
 
@@ -103,19 +107,36 @@ def edit_record(id):
     #TODO format data and calculate final_sum like in insert_record
     if request.method == 'PUT':
         row = record.query.get(id)
-        request_dict = request.form.to_dict()
-        row.name = request_dict.get('name')
-        row.initial_capital = request_dict.get('initial_capital')
-        row.rate = request_dict.get('rate')
-        row.number_of_periods = request_dict.get('number_of_periods')
-        row.effective_rate = request_dict.get('effective_rate')
-        row.final_sum = request_dict.get('final_sum')
+        data = request.form.to_dict()
+        input_values = correct_input_data(data)
+        missing = []
 
-        db.session.commit()
+        for key in input_values.keys():
+            if not input_values[key]:
+                missing.append(key)
+        
+        if not missing:
 
-        new_row = record.query.get(id)
-        response = record_schema.dump(new_row)
-        return response
+            effective_rate = 'placeholder'
+            
+            if input_values['type_of_period'] in ['annual', 'monthly','weekly','daily']:
+                final_sum = calc_final_sum(input_values['initial_capital'], input_values['rate'], input_values['number_of_periods'],input_values['type_of_period'])
+            else:
+                return {'error': "type_of_period has an incorrect value, it should be 'annual', 'monthly', 'weekly' or 'daily' "}
+
+            row.effective_rate = effective_rate
+            row.final_sum = final_sum
+            row.initial_capital = input_values['initial_capital']
+            row.name = input_values['name']
+            row.number_of_periods = input_values['number_of_periods']
+            row.rate = input_values['rate']
+            row.type_of_period = input_values['type_of_period']
+            
+            db.session.commit()
+            print(row)
+            new_row = record.query.get(row.id)
+            response = record_schema.dump(new_row)
+            return response
     else:
         return {'error': 'Incorrect HTTP method'}
 
