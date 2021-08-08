@@ -54,8 +54,8 @@ def insert_record():
     if request.method == 'POST':
 
         data = request.form.to_dict()
-
         input_values =  correct_input_data(data)
+
         missing = []
 
         for key in input_values.keys():
@@ -121,12 +121,11 @@ def edit_record(id):
             effective_rate = 'placeholder'
             
             if input_values['type_of_period'] in ['annual', 'monthly','weekly','daily']:
-                final_sum = calc_final_sum(input_values['initial_capital'], input_values['rate'], input_values['number_of_periods'],input_values['type_of_period'])
+                row.final_sum = calc_final_sum(input_values['initial_capital'], input_values['rate'], input_values['number_of_periods'],input_values['type_of_period'])
             else:
                 return {'error': "type_of_period has an incorrect value, it should be 'annual', 'monthly', 'weekly' or 'daily' "}
 
             row.effective_rate = effective_rate
-            row.final_sum = final_sum
             row.initial_capital = input_values['initial_capital']
             row.name = input_values['name']
             row.number_of_periods = input_values['number_of_periods']
@@ -150,4 +149,4 @@ def edit_record(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
