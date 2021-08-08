@@ -134,9 +134,8 @@ def edit_record(id):
             row.type_of_period = input_values['type_of_period']
 
             db.session.commit()
-            print(row)
-            new_row = record.query.get(row.id)
-            response = record_schema.dump(new_row)
+
+            response = record_schema.dump(row)
             return response
             
         else:
