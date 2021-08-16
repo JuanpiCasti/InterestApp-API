@@ -9,7 +9,6 @@ class Record(db.Model):
     initial_capital = db.Column(db.Float)
     rate = db.Column(db.Float)
     number_of_periods = db.Column(db.Integer)
-    effective_rate = db.Column(db.Float)
     final_sum = db.Column(db.Float)
     type_of_period = db.Column(db.String(10))
 
