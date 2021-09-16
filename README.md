@@ -1,7 +1,7 @@
 # InterestApp-API
 Simple Flask-SQLAlchemy app to practice.
 
-CRUD for saving compound interest inversions.
+CRUD for saving compound interest investments.
 
 '/' to query all rows (GET)
 
